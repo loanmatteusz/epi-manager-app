@@ -2,6 +2,7 @@
 import { GoalIcon } from "lucide-vue-next";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
+import { useToast } from "vue-toastification";
 import Logo from "@/assets/vue.svg";
 
 const state = ref({
@@ -10,12 +11,24 @@ const state = ref({
 });
 
 const router = useRouter();
+const toast = useToast();
+
+function login({ email, password }: typeof state.value) {
+  if (email === "test@mail.com" && password === "123") {
+    localStorage.setItem("token", "true");
+    toast.success("Login realizado com sucesso!");
+    router.push("/dashboard");
+  } else {
+    toast.error("Email ou senha incorretos!");
+  }
+}
 
 function onSubmit() {
-	console.log("Login submitted", state.value);
-
-	localStorage.setItem("token", "true");
-	router.push("/dashboard");
+	if (!state.value.email || !state.value.password) {
+    toast.error("Preencha todos os campos!");
+    return;
+  }
+  login(state.value);
 }
 </script>
 
