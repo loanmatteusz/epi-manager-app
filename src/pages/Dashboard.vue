@@ -1,34 +1,34 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  import { onMounted, ref } from "vue";
+  import { Button } from "@/components/ui/button";
+  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface EpiMetricsResponse {
-	total: number;
-	expired: number;
-	byCategory: Record<string, number>;
-}
+  interface EpiMetricsResponse {
+    total: number;
+    expired: number;
+    byCategory: Record<string, number>;
+  }
 
-const metrics = ref<EpiMetricsResponse>({
-	total: 0,
-	expired: 0,
-	byCategory: {},
-});
+  const metrics = ref<EpiMetricsResponse>({
+    total: 0,
+    expired: 0,
+    byCategory: {},
+  });
 
-async function fetchMetrics() {
-	metrics.value = {
-		total: 120,
-		expired: 5,
-		byCategory: {
-			Capacetes: 30,
-			Luvas: 25,
-			Botas: 40,
-			"EPIs Diversos": 25,
-		},
-	};
-}
+  async function fetchMetrics() {
+    metrics.value = {
+      total: 120,
+      expired: 5,
+      byCategory: {
+        Capacetes: 30,
+        Luvas: 25,
+        Botas: 40,
+        "EPIs Diversos": 25,
+      },
+    };
+  }
 
-onMounted(fetchMetrics);
+  onMounted(fetchMetrics);
 </script>
 
 <template>
