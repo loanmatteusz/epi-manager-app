@@ -2,12 +2,7 @@
   import { onMounted, ref } from "vue";
   import { Button } from "@/components/ui/button";
   import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-  interface EpiMetricsResponse {
-    total: number;
-    expired: number;
-    byCategory: Record<string, number>;
-  }
+  import { type EpiMetricsResponse, metricsService } from "@/services/metric.service";
 
   const metrics = ref<EpiMetricsResponse>({
     total: 0,
@@ -15,17 +10,20 @@
     byCategory: {},
   });
 
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+
   async function fetchMetrics() {
-    metrics.value = {
-      total: 120,
-      expired: 5,
-      byCategory: {
-        Capacetes: 30,
-        Luvas: 25,
-        Botas: 40,
-        "EPIs Diversos": 25,
-      },
-    };
+    try {
+      loading.value = true;
+      error.value = null;
+      metrics.value = await metricsService.get();
+    } catch (err) {
+      console.error(err);
+      error.value = "Erro ao carregar métricas";
+    } finally {
+      loading.value = false;
+    }
   }
 
   onMounted(fetchMetrics);
@@ -35,7 +33,11 @@
   <div class="space-y-6">
     <h1 class="text-2xl font-bold">Dashboard</h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-if="loading" class="text-muted-foreground">Carregando...</div>
+
+    <div v-else-if="error" class="text-red-600">{{ error }}</div>
+
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card>
         <CardHeader>
           <CardTitle>Total EPIs</CardTitle>

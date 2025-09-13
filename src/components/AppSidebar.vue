@@ -66,10 +66,10 @@ const items = [
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton asChild>
-            <Link href="/">
+            <RouterLink to="/">
               <img :src="Logo" alt="logo" width="20" height="20" />
               <span>Loan Matteus</span>
-            </Link>
+            </RouterLink>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
