@@ -10,7 +10,6 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Props
 defineProps<{
 	item: T;
 	onExpand?: () => void;

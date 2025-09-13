@@ -1,45 +1,44 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import type { Category } from "@/types/category";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import type { Category } from "@/types/category";
 
 interface Props {
-  open: boolean;
-  category: Category | null;
+	open: boolean;
+	category: Category | null;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  (e: "update:open", value: boolean): void;
-  (e: "save", category: Category): void;
+	(e: "update:open", value: boolean): void;
+	(e: "save", category: Category): void;
 }>();
 
-// estado interno editável do formulário
 const form = ref<Category | null>(null);
 
 watch(
-  () => props.category,
-  (newVal) => {
-    form.value = newVal ? { ...newVal } : null; // clona para não mutar direto
-  },
-  { immediate: true }
+	() => props.category,
+	(newVal) => {
+		form.value = newVal ? { ...newVal } : null;
+	},
+	{ immediate: true },
 );
 
 const handleClose = () => emit("update:open", false);
 
 const handleSave = () => {
-  if (form.value) {
-    emit("save", form.value);
-    handleClose();
-  }
+	if (form.value) {
+		emit("save", form.value);
+		handleClose();
+	}
 };
 </script>
 

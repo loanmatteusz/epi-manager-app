@@ -64,7 +64,6 @@ async function fetchEpis() {
 			category: { id: "1", name: "Test" },
 			expiration: new Date("2025-06-30"),
 		},
-		// adicione mais conforme necessário
 	];
 
 	const filtered = allEpis.filter((e) =>
@@ -77,10 +76,8 @@ async function fetchEpis() {
 	data.value = filtered.slice(start, start + pageSize.value);
 }
 
-// Sempre que filtro ou página mudar, busca de novo
 watch([filterName, pageIndex, pageSize], fetchEpis, { immediate: true });
 
-// Estado da tabela
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
 const columnVisibility = ref<VisibilityState>({});

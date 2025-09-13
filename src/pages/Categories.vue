@@ -20,6 +20,7 @@ import { useToast } from "vue-toastification";
 import { createColumns } from "@/components/categories/columns";
 import DataTable from "@/components/categories/data-table.vue";
 import EditCategoryModal from "@/components/modals/categories/EditCategoryModal.vue";
+import NewCategoryModal from "@/components/modals/categories/NewCategoryModal.vue";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -34,6 +35,8 @@ import type { Category } from "@/types/category";
 const toast = useToast();
 
 const data = ref<Category[]>([]);
+
+const isCreateOpen = ref(false);
 const isEditOpen = ref(false);
 const categoryToEdit = ref<Category | null>(null);
 
@@ -57,14 +60,31 @@ async function fetchCategories() {
 	}
 }
 
-async function handleSaveCategory(category: Category) {
+async function handleCreateCategory(category: Category) {
+	try {
+		await categoryService.create(category);
+		await fetchCategories();
+		toast.success("Category created successfully");
+	} catch (error) {
+		console.error({ error });
+		toast.error(`Category creation failed`);
+	}
+}
+
+async function handleEditCategory(category: Category) {
 	try {
 		await categoryService.update(category.id, { name: category.name });
 		await fetchCategories();
+		toast.success("Category updated successfully");
 	} catch (error) {
-		console.log({error});
+		console.log({ error });
+		toast.error(`Category update failed`);
 	}
-};
+}
+
+function handleCreateModal() {
+	isCreateOpen.value = true;
+}
 
 function handleEditModal(category: Category) {
 	categoryToEdit.value = category;
@@ -154,7 +174,7 @@ const table = useVueTable({
 
       <Button
         variant="outline"
-        @click="console.log('Criar nova categoria')"
+        @click="handleCreateModal"
       >
         New Category
       </Button>
@@ -206,9 +226,14 @@ const table = useVueTable({
     </div>
   </div>
 
+  <NewCategoryModal
+    v-model:open="isCreateOpen"
+    @create="handleCreateCategory"
+  />
+
   <EditCategoryModal
     v-model:open="isEditOpen"
     :category="categoryToEdit"
-    @save="handleSaveCategory"
+    @save="handleEditCategory"
   />
 </template>

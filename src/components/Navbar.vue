@@ -13,14 +13,13 @@ import {
 } from "./ui/dropdown-menu";
 import { SidebarTrigger } from "./ui/sidebar";
 
-// Estado para tema (light/dark/system)
 const theme = ref("system");
 
 function setTheme(t: string) {
 	theme.value = t;
 	if (t === "dark") document.documentElement.classList.add("dark");
 	else if (t === "light") document.documentElement.classList.remove("dark");
-	else document.documentElement.classList.remove("dark"); // system
+	else document.documentElement.classList.remove("dark");
 }
 </script>
 
