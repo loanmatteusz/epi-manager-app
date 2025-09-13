@@ -51,6 +51,16 @@
     }
   }
 
+  async function removeCategory(id: string) {
+    try {
+      await categoryService.delete(id);
+      await fetchCategories();
+    } catch (error) {
+      console.error("Erro ao deletar categoria:", error);
+    }
+  }
+
+
   watch([filterName, pageIndex, pageSize], fetchCategories, { immediate: true });
 
   function prevPage() {
