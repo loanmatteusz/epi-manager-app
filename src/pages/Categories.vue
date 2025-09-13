@@ -19,6 +19,7 @@ import { computed, ref, watch } from "vue";
 import { useToast } from "vue-toastification";
 import { createColumns } from "@/components/categories/columns";
 import DataTable from "@/components/categories/data-table.vue";
+import EditCategoryModal from "@/components/modals/categories/EditCategoryModal.vue";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -33,6 +34,8 @@ import type { Category } from "@/types/category";
 const toast = useToast();
 
 const data = ref<Category[]>([]);
+const isEditOpen = ref(false);
+const categoryToEdit = ref<Category | null>(null);
 
 const totalCount = ref(0);
 const pageIndex = ref(0);
@@ -54,6 +57,20 @@ async function fetchCategories() {
 	}
 }
 
+async function handleSaveCategory(category: Category) {
+	try {
+		await categoryService.update(category.id, { name: category.name });
+		await fetchCategories();
+	} catch (error) {
+		console.log({error});
+	}
+};
+
+function handleEditModal(category: Category) {
+	categoryToEdit.value = category;
+	isEditOpen.value = true;
+}
+
 async function removeCategory(id: string) {
 	try {
 		await categoryService.delete(id);
@@ -61,7 +78,7 @@ async function removeCategory(id: string) {
 		toast.success(`Category deleted successfully`);
 	} catch (error) {
 		console.error("Erro ao deletar categoria:", error);
-    toast.error(`Category deleted failed`);
+		toast.error(`Category deleted failed`);
 	}
 }
 
@@ -92,7 +109,7 @@ const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
 
 const columns = createColumns({
-	onEdit: (cat) => console.log("Editar", cat),
+	onEdit: handleEditModal,
 	onDelete: removeCategory,
 });
 
@@ -188,4 +205,10 @@ const table = useVueTable({
         </Button>
     </div>
   </div>
+
+  <EditCategoryModal
+    v-model:open="isEditOpen"
+    :category="categoryToEdit"
+    @save="handleSaveCategory"
+  />
 </template>
