@@ -6,7 +6,12 @@ import DropdownAction from "../DropdownAction.vue";
 import Button from "../ui/button/Button.vue";
 import { Checkbox } from "../ui/checkbox";
 
-export const columns: ColumnDef<Category>[] = [
+export type ColumnsOptions = {
+	onEdit: (category: Category) => void;
+	onDelete: (id: string) => void;
+}
+
+export const createColumns = ({ onEdit, onDelete }: ColumnsOptions): ColumnDef<Category>[] => [
 	{
 		id: "select",
 		header: ({ table }) =>
@@ -14,8 +19,7 @@ export const columns: ColumnDef<Category>[] = [
 				modelValue:
 					table.getIsAllPageRowsSelected() ||
 					(table.getIsSomePageRowsSelected() && "indeterminate"),
-				"onUpdate:modelValue": (value) =>
-					table.toggleAllPageRowsSelected(!!value),
+				"onUpdate:modelValue": (value) => table.toggleAllPageRowsSelected(!!value),
 				ariaLabel: "Select all",
 				class: "h-4 w-4",
 			}),
@@ -31,16 +35,15 @@ export const columns: ColumnDef<Category>[] = [
 	},
 	{
 		accessorKey: "name",
-		header: ({ column }) => {
-			return h(
+		header: ({ column }) =>
+			h(
 				Button,
 				{
 					variant: "ghost",
 					onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
 				},
-				() => ["Name", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })],
-			);
-		},
+				() => ["Name", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
+			),
 		cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("name")),
 	},
 	{
@@ -54,8 +57,8 @@ export const columns: ColumnDef<Category>[] = [
 				{ class: "flex justify-end" },
 				h(DropdownAction as any, {
 					category,
-					onEdit: (cat: Category) => console.log("Editar:", cat),
-					onDelete: (cat: Category) => console.log("Remover:", cat),
+					onEdit,
+					onDelete: () => onDelete(category.id),
 				})
 			);
 		},

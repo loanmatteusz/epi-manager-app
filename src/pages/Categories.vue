@@ -1,117 +1,128 @@
 <script setup lang="ts">
-  import type {
-    ColumnDef,
-    ColumnFiltersState,
-    ExpandedState,
-    SortingState,
-    VisibilityState,
-  } from "@tanstack/vue-table";
-  import {
-    getCoreRowModel,
-    getExpandedRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useVueTable,
-  } from "@tanstack/vue-table";
-  import { ChevronDown } from "lucide-vue-next";
-  import { computed, ref, watch } from "vue";
-  import { columns as categoryColumns } from "@/components/categories/columns";
-  import DataTable from "@/components/categories/data-table.vue";
-  import { Button } from "@/components/ui/button";
-  import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu";
-  import { Input } from "@/components/ui/input";
-  import { categoryService } from "@/services/category.service";
-  import type { Category } from "@/types/category";
+import type {
+	ColumnDef,
+	ColumnFiltersState,
+	ExpandedState,
+	SortingState,
+	VisibilityState,
+} from "@tanstack/vue-table";
+import {
+	getCoreRowModel,
+	getExpandedRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	useVueTable,
+} from "@tanstack/vue-table";
+import { ChevronDown } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
+import { useToast } from "vue-toastification";
+import { createColumns } from "@/components/categories/columns";
+import DataTable from "@/components/categories/data-table.vue";
+import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { categoryService } from "@/services/category.service";
+import type { Category } from "@/types/category";
 
-  const data = ref<Category[]>([]);
+const toast = useToast();
 
-  const totalCount = ref(0);
-  const pageIndex = ref(0);
-  const pageSize = ref(10);
-  const filterName = ref("");
+const data = ref<Category[]>([]);
 
-  async function fetchCategories() {
-    try {
-      const response = await categoryService.getAll({
-        page: pageIndex.value + 1,
-        pageSize: pageSize.value,
-        name: filterName.value || undefined,
-      });
+const totalCount = ref(0);
+const pageIndex = ref(0);
+const pageSize = ref(10);
+const filterName = ref("");
 
-      data.value = response.data;
-      totalCount.value = response.totalItems;
-    } catch (error) {
-      console.error("Erro ao buscar categorias:", error);
-    }
-  }
+async function fetchCategories() {
+	try {
+		const response = await categoryService.getAll({
+			page: pageIndex.value + 1,
+			pageSize: pageSize.value,
+			name: filterName.value || undefined,
+		});
 
-  async function removeCategory(id: string) {
-    try {
-      await categoryService.delete(id);
-      await fetchCategories();
-    } catch (error) {
-      console.error("Erro ao deletar categoria:", error);
-    }
-  }
+		data.value = response.data;
+		totalCount.value = response.totalItems;
+	} catch (error) {
+		console.error("Erro ao buscar categorias:", error);
+	}
+}
 
+async function removeCategory(id: string) {
+	try {
+		await categoryService.delete(id);
+		await fetchCategories();
+		toast.success(`Category deleted successfully`);
+	} catch (error) {
+		console.error("Erro ao deletar categoria:", error);
+    toast.error(`Category deleted failed`);
+	}
+}
 
-  watch([filterName, pageIndex, pageSize], fetchCategories, { immediate: true });
+watch([filterName, pageIndex, pageSize], fetchCategories, { immediate: true });
 
-  function prevPage() {
-    if (pageIndex.value > 0) {
-      pageIndex.value--;
-    }
-  }
+function prevPage() {
+	if (pageIndex.value > 0) {
+		pageIndex.value--;
+	}
+}
 
-  function nextPage() {
-    const maxPage = Math.ceil(totalCount.value / pageSize.value) - 1;
-    if (pageIndex.value < maxPage) {
-      pageIndex.value++;
-    }
-  }
+function nextPage() {
+	const maxPage = Math.ceil(totalCount.value / pageSize.value) - 1;
+	if (pageIndex.value < maxPage) {
+		pageIndex.value++;
+	}
+}
 
-  const startItem = computed(() => pageIndex.value * pageSize.value + 1);
-  const endItem = computed(() => Math.min((pageIndex.value + 1) * pageSize.value, totalCount.value));
+const startItem = computed(() => pageIndex.value * pageSize.value + 1);
+const endItem = computed(() =>
+	Math.min((pageIndex.value + 1) * pageSize.value, totalCount.value),
+);
 
-  const sorting = ref<SortingState>([]);
-  const columnFilters = ref<ColumnFiltersState>([]);
-  const columnVisibility = ref<VisibilityState>({});
-  const rowSelection = ref({});
-  const expanded = ref<ExpandedState>({});
+const sorting = ref<SortingState>([]);
+const columnFilters = ref<ColumnFiltersState>([]);
+const columnVisibility = ref<VisibilityState>({});
+const rowSelection = ref({});
+const expanded = ref<ExpandedState>({});
 
-  const table = useVueTable({
-    data,
-    columns: categoryColumns as ColumnDef<Category>[],
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    pageCount: Math.ceil(totalCount.value / pageSize.value),
-    state: {
-      get sorting() {
-        return sorting.value;
-      },
-      get columnFilters() {
-        return columnFilters.value;
-      },
-      get columnVisibility() {
-        return columnVisibility.value;
-      },
-      get rowSelection() {
-        return rowSelection.value;
-      },
-      get expanded() {
-        return expanded.value;
-      },
-    },
-  });
+const columns = createColumns({
+	onEdit: (cat) => console.log("Editar", cat),
+	onDelete: removeCategory,
+});
+
+const table = useVueTable({
+	data,
+	columns: columns as ColumnDef<Category>[],
+	getCoreRowModel: getCoreRowModel(),
+	getSortedRowModel: getSortedRowModel(),
+	getFilteredRowModel: getFilteredRowModel(),
+	getExpandedRowModel: getExpandedRowModel(),
+	getPaginationRowModel: getPaginationRowModel(),
+	pageCount: Math.ceil(totalCount.value / pageSize.value),
+	state: {
+		get sorting() {
+			return sorting.value;
+		},
+		get columnFilters() {
+			return columnFilters.value;
+		},
+		get columnVisibility() {
+			return columnVisibility.value;
+		},
+		get rowSelection() {
+			return rowSelection.value;
+		},
+		get expanded() {
+			return expanded.value;
+		},
+	},
+});
 </script>
 
 <template>
@@ -153,7 +164,7 @@
       </DropdownMenu>
     </div>
 
-    <DataTable :columns="categoryColumns" :data="data" />
+    <DataTable :columns="columns" :data="data" />
 
     <div class="flex items-center justify-end gap-2 py-4">
       <div class="text-sm text-muted-foreground">
