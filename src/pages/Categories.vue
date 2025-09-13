@@ -1,99 +1,107 @@
 <script setup lang="ts">
-import type {
-	ColumnDef,
-	ColumnFiltersState,
-	ExpandedState,
-	SortingState,
-	VisibilityState,
-} from "@tanstack/vue-table";
-import {
-	getCoreRowModel,
-	getExpandedRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useVueTable,
-} from "@tanstack/vue-table";
-import { ChevronDown } from "lucide-vue-next";
-import { ref, watch } from "vue";
-import { columns as categoryColumns } from "@/components/categories/columns";
-import DataTable from "@/components/categories/data-table.vue";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import type { Category } from "@/types/category";
+  import type {
+    ColumnDef,
+    ColumnFiltersState,
+    ExpandedState,
+    SortingState,
+    VisibilityState,
+  } from "@tanstack/vue-table";
+  import {
+    getCoreRowModel,
+    getExpandedRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useVueTable,
+  } from "@tanstack/vue-table";
+  import { ChevronDown } from "lucide-vue-next";
+  import { computed, ref, watch } from "vue";
+  import { columns as categoryColumns } from "@/components/categories/columns";
+  import DataTable from "@/components/categories/data-table.vue";
+  import { Button } from "@/components/ui/button";
+  import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu";
+  import { Input } from "@/components/ui/input";
+  import { categoryService } from "@/services/category.service";
+  import type { Category } from "@/types/category";
 
-const data = ref<Category[]>([]);
+  const data = ref<Category[]>([]);
 
-const pageIndex = ref(0);
-const pageSize = ref(5);
-const totalCount = ref(0);
-const filterName = ref("");
+  const totalCount = ref(0);
+  const pageIndex = ref(0);
+  const pageSize = ref(10);
+  const filterName = ref("");
 
-async function fetchCategories() {
+  async function fetchCategories() {
+    try {
+      const response = await categoryService.getAll({
+        page: pageIndex.value + 1,
+        pageSize: pageSize.value,
+        name: filterName.value || undefined,
+      });
 
-	const allCategories: Category[] = [
-		{ id: "1", name: "EPI" },
-		{ id: "2", name: "Ferramentas" },
-		{ id: "3", name: "EPIs de Segurança" },
-		{ id: "4", name: "Luvas" },
-		{ id: "5", name: "Capacetes" },
-		{ id: "6", name: "Óculos" },
-		{ id: "7", name: "Botas" },
-	];
+      data.value = response.data;
+      totalCount.value = response.totalItems;
+    } catch (error) {
+      console.error("Erro ao buscar categorias:", error);
+    }
+  }
 
+  watch([filterName, pageIndex, pageSize], fetchCategories, { immediate: true });
 
-	const filtered = allCategories.filter((c) =>
-		c.name.toLowerCase().includes(filterName.value.toLowerCase()),
-	);
+  function prevPage() {
+    if (pageIndex.value > 0) {
+      pageIndex.value--;
+    }
+  }
 
-	totalCount.value = filtered.length;
+  function nextPage() {
+    const maxPage = Math.ceil(totalCount.value / pageSize.value) - 1;
+    if (pageIndex.value < maxPage) {
+      pageIndex.value++;
+    }
+  }
 
+  const startItem = computed(() => pageIndex.value * pageSize.value + 1);
+  const endItem = computed(() => Math.min((pageIndex.value + 1) * pageSize.value, totalCount.value));
 
-	const start = pageIndex.value * pageSize.value;
-	data.value = filtered.slice(start, start + pageSize.value);
-}
+  const sorting = ref<SortingState>([]);
+  const columnFilters = ref<ColumnFiltersState>([]);
+  const columnVisibility = ref<VisibilityState>({});
+  const rowSelection = ref({});
+  const expanded = ref<ExpandedState>({});
 
-watch([filterName, pageIndex, pageSize], fetchCategories, { immediate: true });
-
-const sorting = ref<SortingState>([]);
-const columnFilters = ref<ColumnFiltersState>([]);
-const columnVisibility = ref<VisibilityState>({});
-const rowSelection = ref({});
-const expanded = ref<ExpandedState>({});
-
-const table = useVueTable({
-	data,
-	columns: categoryColumns as ColumnDef<Category>[],
-	getCoreRowModel: getCoreRowModel(),
-	getSortedRowModel: getSortedRowModel(),
-	getFilteredRowModel: getFilteredRowModel(),
-	getExpandedRowModel: getExpandedRowModel(),
-	getPaginationRowModel: getPaginationRowModel(),
-	pageCount: Math.ceil(totalCount.value / pageSize.value),
-	state: {
-		get sorting() {
-			return sorting.value;
-		},
-		get columnFilters() {
-			return columnFilters.value;
-		},
-		get columnVisibility() {
-			return columnVisibility.value;
-		},
-		get rowSelection() {
-			return rowSelection.value;
-		},
-		get expanded() {
-			return expanded.value;
-		},
-	},
-});
+  const table = useVueTable({
+    data,
+    columns: categoryColumns as ColumnDef<Category>[],
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    pageCount: Math.ceil(totalCount.value / pageSize.value),
+    state: {
+      get sorting() {
+        return sorting.value;
+      },
+      get columnFilters() {
+        return columnFilters.value;
+      },
+      get columnVisibility() {
+        return columnVisibility.value;
+      },
+      get rowSelection() {
+        return rowSelection.value;
+      },
+      get expanded() {
+        return expanded.value;
+      },
+    },
+  });
 </script>
 
 <template>
@@ -139,25 +147,24 @@ const table = useVueTable({
 
     <div class="flex items-center justify-end gap-2 py-4">
       <div class="text-sm text-muted-foreground">
-        {{ pageIndex * pageSize + 1 }} -
-        {{ Math.min((pageIndex + 1) * pageSize, totalCount) }} of {{ totalCount }}
+        {{ startItem }} - {{ endItem }} of {{ totalCount }}
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        :disabled="pageIndex === 0"
-        @click="pageIndex--"
-      >
-        Previous
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        :disabled="(pageIndex + 1) * pageSize >= totalCount"
-        @click="pageIndex++"
-      >
-        Next
-      </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="pageIndex === 0"
+          @click="prevPage"
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="pageIndex >= Math.ceil(totalCount / pageSize) - 1"
+          @click="nextPage"
+        >
+          Next
+        </Button>
     </div>
   </div>
 </template>

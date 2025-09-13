@@ -2,7 +2,7 @@ import type { Category } from "@/types/category";
 import { api } from "./api";
 
 export const categoryService = {
-    async getAll(params?: { page?: number; pageSize?: number; name?: string }): Promise<{ data: Category[]; total: number }> {
+    async getAll(params?: { page?: number; pageSize?: number; name?: string }): Promise<{ data: Category[]; totalItems: number }> {
         const response = await api.get("/categories", { params });
         return response.data;
     },
