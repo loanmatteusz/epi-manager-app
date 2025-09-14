@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { MoreHorizontal } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+  import { MoreHorizontal } from 'lucide-vue-next';
+  import { Button } from '@/components/ui/button';
+  import {
+      DropdownMenu,
+      DropdownMenuContent,
+      DropdownMenuItem,
+      DropdownMenuLabel,
+      DropdownMenuSeparator,
+      DropdownMenuTrigger
+  } from '@/components/ui/dropdown-menu';
 
-defineProps<{
-  epi: {
-    id: string;
-    name: string;
+  defineProps<{
+    epi: {
+      id: string;
+      name: string;
+    }
+  }>();
+
+  function copy(id: string) {
+    navigator.clipboard.writeText(id);
   }
-}>();
-
-function copy(id: string) {
-  navigator.clipboard.writeText(id)
-}
 </script>
 
 <template>

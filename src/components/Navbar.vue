@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { LogOut, Moon, Settings, SquareMenu, Sun, User } from "lucide-vue-next";
-import { ref } from "vue";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { SidebarTrigger } from "./ui/sidebar";
+  import { LogOut, Moon, Settings, SquareMenu, Sun, User } from "lucide-vue-next";
+  import { ref } from "vue";
+  import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+  import { Button } from "./ui/button";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "./ui/dropdown-menu";
+  import { SidebarTrigger } from "./ui/sidebar";
 
-const theme = ref("system");
+  const theme = ref("system");
 
-function setTheme(t: string) {
-	theme.value = t;
-	if (t === "dark") document.documentElement.classList.add("dark");
-	else if (t === "light") document.documentElement.classList.remove("dark");
-	else document.documentElement.classList.remove("dark");
-}
+  function setTheme(t: string) {
+    theme.value = t;
+    if (t === "dark") document.documentElement.classList.add("dark");
+    else if (t === "light") document.documentElement.classList.remove("dark");
+    else document.documentElement.classList.remove("dark");
+  }
 </script>
 
 <template>
@@ -30,7 +30,6 @@ function setTheme(t: string) {
     <div class="flex items-center gap-4">
       <router-link to="/">Dashboard</router-link>
 
-      <!-- Toggle Theme -->
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon" class="relative">
@@ -50,7 +49,6 @@ function setTheme(t: string) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <!-- User Dropdown -->
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Avatar>
@@ -73,7 +71,6 @@ function setTheme(t: string) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <!-- Menu Dropdown -->
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon">

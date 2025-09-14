@@ -1,24 +1,24 @@
 <script setup lang="ts" generic="T">
-import { MoreHorizontal } from "lucide-vue-next";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  import { MoreHorizontal } from "lucide-vue-next";
+  import { Button } from "@/components/ui/button";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu";
 
-defineProps<{
-	item: T;
-	onExpand?: () => void;
-}>();
+  defineProps<{
+    item: T;
+    onExpand?: () => void;
+  }>();
 
-const emit = defineEmits<{
-	(e: "edit", item: T): void;
-	(e: "delete", item: T): void;
-}>();
+  const emit = defineEmits<{
+    (e: "edit", item: T): void;
+    (e: "delete", item: T): void;
+  }>();
 </script>
 
 <template>

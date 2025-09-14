@@ -1,63 +1,63 @@
 <script setup lang="ts">
-import {
-	ChevronUp,
-	LayoutDashboard,
-	Settings,
-	ShieldCheck,
-	Tags,
-	User2,
-} from "lucide-vue-next";
-import { RouterLink, useRouter } from "vue-router";
-import Logo from "@/assets/vue.svg";
-import {
-	Sidebar,
-	SidebarContent,
-	SidebarFooter,
-	SidebarGroup,
-	SidebarGroupContent,
-	SidebarGroupLabel,
-	SidebarHeader,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
-	SidebarSeparator,
-} from "@/components/ui/sidebar";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+  import {
+    ChevronUp,
+    LayoutDashboard,
+    Settings,
+    ShieldCheck,
+    Tags,
+    User2,
+  } from "lucide-vue-next";
+  import { RouterLink, useRouter } from "vue-router";
+  import Logo from "@/assets/vue.svg";
+  import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarSeparator,
+  } from "@/components/ui/sidebar";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+  } from "./ui/dropdown-menu";
 
-const router = useRouter();
+  const router = useRouter();
 
-function signOut() {
-	localStorage.removeItem("token");
-	router.push("/login");
-}
+  function signOut() {
+    localStorage.removeItem("token");
+    router.push("/login");
+  }
 
-const items = [
-	{
-		title: "Dashboard",
-		url: "/dashboard",
-		icon: LayoutDashboard,
-	},
-	{
-		title: "Epis",
-		url: "/epis",
-		icon: ShieldCheck,
-	},
-	{
-		title: "Categories",
-		url: "/categories",
-		icon: Tags,
-	},
-	{
-		title: "Settings",
-		url: "/",
-		icon: Settings,
-	},
-];
+  const items = [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Epis",
+      url: "/epis",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Categories",
+      url: "/categories",
+      icon: Tags,
+    },
+    {
+      title: "Settings",
+      url: "/",
+      icon: Settings,
+    },
+  ];
 </script>
 
 <template>
