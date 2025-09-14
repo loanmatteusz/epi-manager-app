@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { GoalIcon } from "lucide-vue-next";
-import { ref } from "vue";
-import { RouterLink, useRouter } from "vue-router";
-import { useToast } from "vue-toastification";
-import Logo from "@/assets/vue.svg";
+  import { GoalIcon } from "lucide-vue-next";
+  import { ref } from "vue";
+  import { RouterLink, useRouter } from "vue-router";
+  import { useToast } from "vue-toastification";
+  import Logo from "@/assets/vue.svg";
 
-const state = ref({
-	email: "",
-	password: "",
-});
+  const state = ref({
+    email: "",
+    password: "",
+  });
 
-const router = useRouter();
-const toast = useToast();
+  const router = useRouter();
+  const toast = useToast();
 
-function login({ email, password }: typeof state.value) {
-  if (email === "test@mail.com" && password === "123") {
-    localStorage.setItem("token", "true");
-    toast.success("Login realizado com sucesso!");
-    router.push("/dashboard");
-  } else {
-    toast.error("Email ou senha incorretos!");
+  function login({ email, password }: typeof state.value) {
+    if (email === "test@mail.com" && password === "123") {
+      localStorage.setItem("token", "true");
+      toast.success("Login realizado com sucesso!");
+      router.push("/dashboard");
+    } else {
+      toast.error("Email ou senha incorretos!");
+    }
   }
-}
 
-function onSubmit() {
-	if (!state.value.email || !state.value.password) {
-    toast.error("Preencha todos os campos!");
-    return;
+  function onSubmit() {
+    if (!state.value.email || !state.value.password) {
+      toast.error("Preencha todos os campos!");
+      return;
+    }
+    login(state.value);
   }
-  login(state.value);
-}
 </script>
 
 <template>

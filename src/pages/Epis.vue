@@ -1,165 +1,165 @@
 <script setup lang="ts">
-import type {
-	ColumnDef,
-	ColumnFiltersState,
-	ExpandedState,
-	SortingState,
-	VisibilityState,
-} from "@tanstack/vue-table";
-import {
-	getCoreRowModel,
-	getExpandedRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useVueTable,
-} from "@tanstack/vue-table";
-import { ChevronDown } from "lucide-vue-next";
-import { computed, ref, watch } from "vue";
-import { useToast } from "vue-toastification";
-import { createColumns } from "@/components/epis/columns";
-import DataTable from "@/components/epis/data-table.vue";
-import EditEpiModal from "@/components/modals/epis/EditEpiModal.vue";
-import NewEpiModal from "@/components/modals/epis/NewEpiModal.vue";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { epiService } from "@/services/epi.service";
-import type { Epi } from "@/types/epi";
+	import type {
+		ColumnDef,
+		ColumnFiltersState,
+		ExpandedState,
+		SortingState,
+		VisibilityState,
+	} from "@tanstack/vue-table";
+	import {
+		getCoreRowModel,
+		getExpandedRowModel,
+		getFilteredRowModel,
+		getPaginationRowModel,
+		getSortedRowModel,
+		useVueTable,
+	} from "@tanstack/vue-table";
+	import { ChevronDown } from "lucide-vue-next";
+	import { computed, ref, watch } from "vue";
+	import { useToast } from "vue-toastification";
+	import { createColumns } from "@/components/epis/columns";
+	import DataTable from "@/components/epis/data-table.vue";
+	import EditEpiModal from "@/components/modals/epis/EditEpiModal.vue";
+	import NewEpiModal from "@/components/modals/epis/NewEpiModal.vue";
+	import { Button } from "@/components/ui/button";
+	import {
+		DropdownMenu,
+		DropdownMenuCheckboxItem,
+		DropdownMenuContent,
+		DropdownMenuTrigger,
+	} from "@/components/ui/dropdown-menu";
+	import { Input } from "@/components/ui/input";
+	import { epiService } from "@/services/epi.service";
+	import type { Epi } from "@/types/epi";
 
-const toast = useToast();
+	const toast = useToast();
 
-const data = ref<Epi[]>([]);
+	const data = ref<Epi[]>([]);
 
-const isCreateOpen = ref(false);
-const isEditOpen = ref(false);
-const epiToEdit = ref<Epi | null>(null);
+	const isCreateOpen = ref(false);
+	const isEditOpen = ref(false);
+	const epiToEdit = ref<Epi | null>(null);
 
-const totalCount = ref(0);
-const pageIndex = ref(0);
-const pageSize = ref(10);
-const filterName = ref("");
+	const totalCount = ref(0);
+	const pageIndex = ref(0);
+	const pageSize = ref(10);
+	const filterName = ref("");
 
-async function fetchEpis() {
-	try {
-		const response = await epiService.getAll({
-			page: pageIndex.value + 1,
-			pageSize: pageSize.value,
-			name: filterName.value || undefined,
-		});
+	async function fetchEpis() {
+		try {
+			const response = await epiService.getAll({
+				page: pageIndex.value + 1,
+				pageSize: pageSize.value,
+				name: filterName.value || undefined,
+			});
 
-		data.value = response.data;
-		totalCount.value = response.totalItems;
-	} catch (error) {
-		console.error("Erro ao buscar epis:", error);
+			data.value = response.data;
+			totalCount.value = response.totalItems;
+		} catch (error) {
+			console.error("Erro ao buscar epis:", error);
+		}
 	}
-}
 
-async function handleCreateEpi(epi: Epi) {
-	try {
-		await epiService.create(epi);
-		await fetchEpis();
-		toast.success("Epi created successfully");
-	} catch (error) {
-		console.error({ error });
-		toast.error(`Epi creation failed`);
+	async function handleCreateEpi(epi: Epi) {
+		try {
+			await epiService.create(epi);
+			await fetchEpis();
+			toast.success("Epi created successfully");
+		} catch (error) {
+			console.error({ error });
+			toast.error(`Epi creation failed`);
+		}
 	}
-}
 
-async function handleEditEpi(epi: Epi) {
-	try {
-		await epiService.update(epi.id, epi);
-		await fetchEpis();
-		toast.success("Epi updated successfully");
-	} catch (error) {
-		console.log({ error });
-		toast.error(`Epi update failed`);
+	async function handleEditEpi(epi: Epi) {
+		try {
+			await epiService.update(epi.id, epi);
+			await fetchEpis();
+			toast.success("Epi updated successfully");
+		} catch (error) {
+			console.log({ error });
+			toast.error(`Epi update failed`);
+		}
 	}
-}
 
-function handleCreateModal() {
-	isCreateOpen.value = true;
-}
-
-function handleEditModal(epi: Epi) {
-	epiToEdit.value = epi;
-	isEditOpen.value = true;
-}
-
-async function removeEpi(id: string) {
-	try {
-		await epiService.delete(id);
-		await fetchEpis();
-		toast.success(`Epi deleted successfully`);
-	} catch (error) {
-		console.error("Erro ao deletar epi:", error);
-		toast.error(`Epi deleted failed`);
+	function handleCreateModal() {
+		isCreateOpen.value = true;
 	}
-}
 
-watch([filterName, pageIndex, pageSize], fetchEpis, { immediate: true });
-
-function prevPage() {
-	if (pageIndex.value > 0) {
-		pageIndex.value--;
+	function handleEditModal(epi: Epi) {
+		epiToEdit.value = epi;
+		isEditOpen.value = true;
 	}
-}
 
-function nextPage() {
-	const maxPage = Math.ceil(totalCount.value / pageSize.value) - 1;
-	if (pageIndex.value < maxPage) {
-		pageIndex.value++;
+	async function removeEpi(id: string) {
+		try {
+			await epiService.delete(id);
+			await fetchEpis();
+			toast.success(`Epi deleted successfully`);
+		} catch (error) {
+			console.error("Erro ao deletar epi:", error);
+			toast.error(`Epi deleted failed`);
+		}
 	}
-}
 
-const startItem = computed(() => pageIndex.value * pageSize.value + 1);
-const endItem = computed(() =>
-	Math.min((pageIndex.value + 1) * pageSize.value, totalCount.value),
-);
+	watch([filterName, pageIndex, pageSize], fetchEpis, { immediate: true });
 
-const sorting = ref<SortingState>([]);
-const columnFilters = ref<ColumnFiltersState>([]);
-const columnVisibility = ref<VisibilityState>({});
-const rowSelection = ref({});
-const expanded = ref<ExpandedState>({});
+	function prevPage() {
+		if (pageIndex.value > 0) {
+			pageIndex.value--;
+		}
+	}
 
-const columns = createColumns({
-	onEdit: handleEditModal,
-	onDelete: removeEpi,
-});
+	function nextPage() {
+		const maxPage = Math.ceil(totalCount.value / pageSize.value) - 1;
+		if (pageIndex.value < maxPage) {
+			pageIndex.value++;
+		}
+	}
 
-const table = useVueTable({
-	data,
-	columns: columns as ColumnDef<Epi>[],
-	getCoreRowModel: getCoreRowModel(),
-	getSortedRowModel: getSortedRowModel(),
-	getFilteredRowModel: getFilteredRowModel(),
-	getExpandedRowModel: getExpandedRowModel(),
-	getPaginationRowModel: getPaginationRowModel(),
-	pageCount: Math.ceil(totalCount.value / pageSize.value),
-	state: {
-		get sorting() {
-			return sorting.value;
+	const startItem = computed(() => pageIndex.value * pageSize.value + 1);
+	const endItem = computed(() =>
+		Math.min((pageIndex.value + 1) * pageSize.value, totalCount.value),
+	);
+
+	const sorting = ref<SortingState>([]);
+	const columnFilters = ref<ColumnFiltersState>([]);
+	const columnVisibility = ref<VisibilityState>({});
+	const rowSelection = ref({});
+	const expanded = ref<ExpandedState>({});
+
+	const columns = createColumns({
+		onEdit: handleEditModal,
+		onDelete: removeEpi,
+	});
+
+	const table = useVueTable({
+		data,
+		columns: columns as ColumnDef<Epi>[],
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		getExpandedRowModel: getExpandedRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
+		pageCount: Math.ceil(totalCount.value / pageSize.value),
+		state: {
+			get sorting() {
+				return sorting.value;
+			},
+			get columnFilters() {
+				return columnFilters.value;
+			},
+			get columnVisibility() {
+				return columnVisibility.value;
+			},
+			get rowSelection() {
+				return rowSelection.value;
+			},
+			get expanded() {
+				return expanded.value;
+			},
 		},
-		get columnFilters() {
-			return columnFilters.value;
-		},
-		get columnVisibility() {
-			return columnVisibility.value;
-		},
-		get rowSelection() {
-			return rowSelection.value;
-		},
-		get expanded() {
-			return expanded.value;
-		},
-	},
-});
+	});
 </script>
 
 <template>

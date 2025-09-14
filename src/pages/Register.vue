@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { GoalIcon } from "lucide-vue-next";
-import { reactive } from "vue";
-import { RouterLink, useRouter } from "vue-router";
-import Logo from "@/assets/vue.svg";
+  import { GoalIcon } from "lucide-vue-next";
+  import { reactive } from "vue";
+  import { RouterLink, useRouter } from "vue-router";
+  import Logo from "@/assets/vue.svg";
 
-const state = reactive({
-	name: "",
-	email: "",
-	password: "",
-});
+  const state = reactive({
+    name: "",
+    email: "",
+    password: "",
+  });
 
-const router = useRouter();
+  const router = useRouter();
 
-async function register({ name, email, password }: typeof state) {
-	if (!name || !email || !password) {
-		alert("Preencha todos os campos!");
-		return false;
-	}
+  async function register({ name, email, password }: typeof state) {
+    if (!name || !email || !password) {
+      alert("Preencha todos os campos!");
+      return false;
+    }
 
-	localStorage.setItem("token", "true");
-	return true;
-}
+    localStorage.setItem("token", "true");
+    return true;
+  }
 
-async function onSubmit() {
-	const success = await register(state);
-	if (success) {
-		router.push("/dashboard");
-	}
-}
+  async function onSubmit() {
+    const success = await register(state);
+    if (success) {
+      router.push("/dashboard");
+    }
+  }
 </script>
 
 <template>
