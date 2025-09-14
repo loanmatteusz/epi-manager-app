@@ -37,22 +37,14 @@ export const createColumns = ({ onEdit, onDelete }: ColumnsOptions): ColumnDef<E
 
 	{
 		accessorKey: "name",
-		header: ({ column }) =>
-			h(
-				Button,
-				{
-					variant: "ghost",
-					onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-				},
-				() => ["Name", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
-			),
-		cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("name")),
+		header: () => h("div", { class: "text-right" }, "Name"),
+		cell: ({ row }) => h("div", { class: "text-right" }, row.getValue("name")),
 	},
 
 	{
 		accessorKey: "description",
-		header: "Description",
-		cell: ({ row }) => h("div", {}, row.getValue("description")),
+		header: () => h("div", { class: "text-right" }, "Description"),
+		cell: ({ row }) => h("div", { class: "text-right" }, row.getValue("description")),
 	},
 
 	{
@@ -63,16 +55,16 @@ export const createColumns = ({ onEdit, onDelete }: ColumnsOptions): ColumnDef<E
 
 	{
 		accessorKey: "category",
-		header: "Category",
-		cell: ({ row }) => h("div", {}, row.original.category?.name || "-"),
+		header: () => h("div", { class: "text-right" }, "Category"),
+		cell: ({ row }) => h("div", { class: "text-right" }, row.original.category?.name || "-"),
 	},
 
 	{
 		accessorKey: "expiration",
-		header: "Expiration",
+		header: () => h("div", { class: "text-right" }, "Expiration"),
 		cell: ({ row }) => {
 			const date = new Date(row.getValue("expiration"));
-			return h("div", {}, date.toLocaleDateString());
+			return h("div", { class: "text-right" }, date.toLocaleDateString());
 		},
 	},
 

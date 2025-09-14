@@ -44,7 +44,7 @@ export const createColumns = ({ onEdit, onDelete }: ColumnsOptions): ColumnDef<C
 				},
 				() => ["Name", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
 			),
-		cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("name")),
+		cell: ({ row }) => h("div", {}, row.getValue("name")),
 	},
 	{
 		id: "actions",
