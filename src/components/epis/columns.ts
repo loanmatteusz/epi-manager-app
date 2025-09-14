@@ -6,7 +6,12 @@ import DropdownAction from "../DropdownAction.vue";
 import Button from "../ui/button/Button.vue";
 import { Checkbox } from "../ui/checkbox";
 
-export const columns: ColumnDef<Epi>[] = [
+export type ColumnsOptions = {
+	onEdit: (epi: Epi) => void;
+	onDelete: (id: string) => void;
+}
+
+export const createColumns = ({ onEdit, onDelete }: ColumnsOptions): ColumnDef<Epi>[] => [
 	{
 		id: "select",
 		header: ({ table }) =>
@@ -81,9 +86,9 @@ export const columns: ColumnDef<Epi>[] = [
 				"div",
 				{ class: "flex justify-end" },
 				h(DropdownAction as any, {
-					item: epi,
-					onEdit: (epi: Epi) => console.log("Editar:", epi),
-					onDelete: (epi: Epi) => console.log("Remover:", epi),
+					epi,
+					onEdit: () => onEdit(epi),
+					onDelete: () => onDelete(epi.id),
 				})
 			);
 		},

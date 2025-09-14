@@ -2,7 +2,7 @@ import type { Epi } from "@/types/epi";
 import { api } from "./api";
 
 export const epiService = {
-    async getAll(params?: { page?: number; pageSize?: number; name?: string; ca?: number; category?: string }): Promise<{ data: Epi[]; total: number }> {
+    async getAll(params?: { page?: number; pageSize?: number; name?: string; ca?: number; category?: string }): Promise<{ data: Epi[]; totalItems: number }> {
         const response = await api.get("/epis", { params });
         return response.data;
     },

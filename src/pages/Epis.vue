@@ -15,9 +15,12 @@ import {
 	useVueTable,
 } from "@tanstack/vue-table";
 import { ChevronDown } from "lucide-vue-next";
-import { ref, watch } from "vue";
-import DataTable from "@/components/categories/data-table.vue";
-import { columns as epiColumns } from "@/components/epis/columns";
+import { computed, ref, watch } from "vue";
+import { useToast } from "vue-toastification";
+import { createColumns } from "@/components/epis/columns";
+import DataTable from "@/components/epis/data-table.vue";
+import EditEpiModal from "@/components/modals/epis/EditEpiModal.vue";
+import NewEpiModal from "@/components/modals/epis/NewEpiModal.vue";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -26,57 +29,98 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { epiService } from "@/services/epi.service";
 import type { Epi } from "@/types/epi";
+
+const toast = useToast();
 
 const data = ref<Epi[]>([]);
 
-const pageIndex = ref(0);
-const pageSize = ref(5);
+const isCreateOpen = ref(false);
+const isEditOpen = ref(false);
+const epiToEdit = ref<Epi | null>(null);
+
 const totalCount = ref(0);
+const pageIndex = ref(0);
+const pageSize = ref(10);
 const filterName = ref("");
 
 async function fetchEpis() {
-	const allEpis: Epi[] = [
-		{
-			id: "1",
-			name: "Capacete",
-			description: "Capacete de segurança",
-			ca: 1234,
-			categoryId: "1",
-			category: { id: "1", name: "Test" },
-			expiration: new Date("2026-01-01"),
-		},
-		{
-			id: "2",
-			name: "Luvas",
-			description: "Luvas resistentes",
-			ca: 5678,
-			categoryId: "1",
-			category: { id: "1", name: "Test" },
-			expiration: new Date("2025-12-31"),
-		},
-		{
-			id: "3",
-			name: "Botas",
-			description: "Botas de segurança",
-			ca: 9012,
-			categoryId: "1",
-			category: { id: "1", name: "Test" },
-			expiration: new Date("2025-06-30"),
-		},
-	];
+	try {
+		const response = await epiService.getAll({
+			page: pageIndex.value + 1,
+			pageSize: pageSize.value,
+			name: filterName.value || undefined,
+		});
 
-	const filtered = allEpis.filter((e) =>
-		e.name.toLowerCase().includes(filterName.value.toLowerCase()),
-	);
+		data.value = response.data;
+		totalCount.value = response.totalItems;
+	} catch (error) {
+		console.error("Erro ao buscar epis:", error);
+	}
+}
 
-	totalCount.value = filtered.length;
+async function handleCreateEpi(epi: Epi) {
+	try {
+		await epiService.create(epi);
+		await fetchEpis();
+		toast.success("Epi created successfully");
+	} catch (error) {
+		console.error({ error });
+		toast.error(`Epi creation failed`);
+	}
+}
 
-	const start = pageIndex.value * pageSize.value;
-	data.value = filtered.slice(start, start + pageSize.value);
+async function handleEditEpi(epi: Epi) {
+	try {
+		await epiService.update(epi.id, epi);
+		await fetchEpis();
+		toast.success("Epi updated successfully");
+	} catch (error) {
+		console.log({ error });
+		toast.error(`Epi update failed`);
+	}
+}
+
+function handleCreateModal() {
+	isCreateOpen.value = true;
+}
+
+function handleEditModal(epi: Epi) {
+	epiToEdit.value = epi;
+	isEditOpen.value = true;
+}
+
+async function removeEpi(id: string) {
+	try {
+		await epiService.delete(id);
+		await fetchEpis();
+		toast.success(`Epi deleted successfully`);
+	} catch (error) {
+		console.error("Erro ao deletar epi:", error);
+		toast.error(`Epi deleted failed`);
+	}
 }
 
 watch([filterName, pageIndex, pageSize], fetchEpis, { immediate: true });
+
+function prevPage() {
+	if (pageIndex.value > 0) {
+		pageIndex.value--;
+	}
+}
+
+function nextPage() {
+	const maxPage = Math.ceil(totalCount.value / pageSize.value) - 1;
+	if (pageIndex.value < maxPage) {
+		pageIndex.value++;
+	}
+}
+
+const startItem = computed(() => pageIndex.value * pageSize.value + 1);
+const endItem = computed(() =>
+	Math.min((pageIndex.value + 1) * pageSize.value, totalCount.value),
+);
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
@@ -84,9 +128,14 @@ const columnVisibility = ref<VisibilityState>({});
 const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
 
+const columns = createColumns({
+	onEdit: handleEditModal,
+	onDelete: removeEpi,
+});
+
 const table = useVueTable({
 	data,
-	columns: epiColumns as ColumnDef<Epi>[],
+	columns: columns as ColumnDef<Epi>[],
 	getCoreRowModel: getCoreRowModel(),
 	getSortedRowModel: getSortedRowModel(),
 	getFilteredRowModel: getFilteredRowModel(),
@@ -119,13 +168,13 @@ const table = useVueTable({
     <div class="flex items-center py-4 gap-2">
       <Input
         class="max-w-sm"
-        placeholder="Filter EPI..."
+        placeholder="Filter Epis by Name"
         v-model="filterName"
       />
 
       <Button
         variant="outline"
-        @click="console.log('Criar novo EPI')"
+        @click="handleCreateModal"
       >
         New EPI
       </Button>
@@ -152,29 +201,39 @@ const table = useVueTable({
       </DropdownMenu>
     </div>
 
-    <DataTable :columns="epiColumns" :data="data" />
+    <DataTable :columns="columns" :data="data" />
 
     <div class="flex items-center justify-end gap-2 py-4">
       <div class="text-sm text-muted-foreground">
-        {{ pageIndex * pageSize + 1 }} -
-        {{ Math.min((pageIndex + 1) * pageSize, totalCount) }} of {{ totalCount }}
+        {{ startItem }} - {{ endItem }} of {{ totalCount }}
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        :disabled="pageIndex === 0"
-        @click="pageIndex--"
-      >
-        Previous
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        :disabled="(pageIndex + 1) * pageSize >= totalCount"
-        @click="pageIndex++"
-      >
-        Next
-      </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="pageIndex === 0"
+          @click="prevPage"
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="pageIndex >= Math.ceil(totalCount / pageSize) - 1"
+          @click="nextPage"
+        >
+          Next
+        </Button>
     </div>
   </div>
+
+  <NewEpiModal
+    v-model:open="isCreateOpen"
+    @create="handleCreateEpi"
+  />
+
+  <EditEpiModal
+    v-model:open="isEditOpen"
+    :epi="epiToEdit"
+    @save="handleEditEpi"
+  />
 </template>
