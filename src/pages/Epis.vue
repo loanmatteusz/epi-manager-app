@@ -44,6 +44,9 @@
 	const pageIndex = ref(0);
 	const pageSize = ref(10);
 	const filterName = ref("");
+	const filterCa = ref("");
+	const filterCategory = ref("");
+
 
 	async function fetchEpis() {
 		try {
@@ -51,6 +54,8 @@
 				page: pageIndex.value + 1,
 				pageSize: pageSize.value,
 				name: filterName.value || undefined,
+				ca: Number(filterCa.value) || undefined,
+				category: filterCategory.value || undefined,
 			});
 
 			data.value = response.data;
@@ -102,7 +107,7 @@
 		}
 	}
 
-	watch([filterName, pageIndex, pageSize], fetchEpis, { immediate: true });
+	watch([filterName, filterCa, filterCategory, pageIndex, pageSize], fetchEpis, { immediate: true });
 
 	function prevPage() {
 		if (pageIndex.value > 0) {
@@ -165,40 +170,50 @@
 <template>
   <div class="w-full">
     <h1 class="flex font-bold text-2xl">Epis</h1>
-    <div class="flex items-center py-4 gap-2">
-      <Input
-        class="max-w-sm"
-        placeholder="Filter Epis by Name"
-        v-model="filterName"
-      />
+    <div class="flex flex-col md:flex-row items-start md:items-center py-4 gap-2">
+		<Input
+			class="max-w-md w-full md:w-auto"
+			placeholder="Filter Epis by Name"
+			v-model="filterName"
+		/>
+		<Input
+			class="max-w-md w-full md:w-auto"
+			placeholder="Filter by CA"
+			v-model="filterCa"
+		/>
+		<Input
+			class="max-w-md w-full md:w-auto"
+			placeholder="Filter by Category"
+			v-model="filterCategory"
+		/>
+	
+		<Button
+			variant="outline"
+			@click="handleCreateModal"
+		>
+			New EPI
+		</Button>
 
-      <Button
-        variant="outline"
-        @click="handleCreateModal"
-      >
-        New EPI
-      </Button>
+      	<div class="flex-1"></div>
 
-      <div class="flex-1"></div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button variant="outline">
-            Columns <ChevronDown class="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem
-            v-for="column in table.getAllColumns().filter(c => c.getCanHide())"
-            :key="column.id"
-            class="capitalize"
-            :model-value="column.getIsVisible()"
-            @update:model-value="(value) => column.toggleVisibility(!!value)"
-          >
-            {{ column.id }}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+		<DropdownMenu>
+			<DropdownMenuTrigger as-child>
+			<Button variant="outline">
+				Columns <ChevronDown class="ml-2 h-4 w-4" />
+			</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+			<DropdownMenuCheckboxItem
+				v-for="column in table.getAllColumns().filter(c => c.getCanHide())"
+				:key="column.id"
+				class="capitalize"
+				:model-value="column.getIsVisible()"
+				@update:model-value="(value) => column.toggleVisibility(!!value)"
+			>
+				{{ column.id }}
+			</DropdownMenuCheckboxItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
     </div>
 
     <DataTable :columns="columns" :data="data" />
